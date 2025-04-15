@@ -1,0 +1,15 @@
+- name: Update all packages
+  yum:
+    name: '*'
+    state: latest
+
+- name: Disable root SSH login
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PermitRootLogin'
+    line: 'PermitRootLogin no'
+
+- name: Restart SSH
+  service:
+    name: sshd
+    state: restarted

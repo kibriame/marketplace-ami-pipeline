@@ -1,0 +1,5 @@
+- name: Secure and configure instance
+  hosts: all
+  become: true
+  roles:
+    - hardening
