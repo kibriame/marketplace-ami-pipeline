@@ -34,16 +34,16 @@ build {
     script = "scripts/fix-centos-vault.sh"
     execute_command = "sudo -S bash '{{ .Path }}'"
   }
-#provisioner "shell" {
- #   inline = [
- #     "sudo yum install -y epel-release",
-  #    "sudo yum install -y python3"
-  #  ]
-  #}
 
-  provisioner "ansible" {
-    #playbook_file = "../ansible/playbook.yml"
-    playbook_file = "playbook.yml"
+  provisioner "shell" {
+    inline = [
+      "sudo yum install -y epel-release",
+      "sudo yum install -y python3",
+      "sudo ln -s /usr/bin/python3 /usr/bin/python || true"
+    ]
   }
 
+  provisioner "ansible" {
+    playbook_file = "playbook.yml"
+  }
 }
