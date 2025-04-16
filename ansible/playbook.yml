@@ -1,5 +1,13 @@
-- name: Secure and configure instance
-  hosts: all
+---
+- hosts: all
   become: true
-  roles:
-    - hardening
+  tasks:
+    - name: Install essential tools
+      yum:
+        name:
+          - curl
+          - wget
+          - git
+        state: present
+
+
