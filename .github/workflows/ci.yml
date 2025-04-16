@@ -30,3 +30,4 @@ jobs:
           packer init centos7-ami.pkr.hcl
           packer validate centos7-ami.pkr.hcl
           # packer build centos7-ami.pkr.hcl
+          PACKER_LOG=1 packer build centos7-ami.pkr.hcl
