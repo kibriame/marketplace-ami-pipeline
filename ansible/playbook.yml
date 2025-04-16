@@ -1,58 +1,81 @@
 ---
-- hosts: all
+- name: Build CentOS 7 AMI with PHP, MySQL, CakePHP
+  hosts: all
   become: true
+
   tasks:
-    - name: Backup original CentOS-Base.repo
-      copy:
-        src: /etc/yum.repos.d/CentOS-Base.repo
-        dest: /etc/yum.repos.d/CentOS-Base.repo.bak
-        remote_src: yes
-        force: yes
-
-    - name: Replace CentOS yum repos with vault.centos.org URLs
-      copy:
-        dest: /etc/yum.repos.d/CentOS-Base.repo
-        content: |
-          [base]
-          name=CentOS-7.9.2009 - Base
-          baseurl=http://vault.centos.org/7.9.2009/os/$basearch/
-          gpgcheck=1
-          enabled=1
-          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
-
-          [updates]
-          name=CentOS-7.9.2009 - Updates
-          baseurl=http://vault.centos.org/7.9.2009/updates/$basearch/
-          gpgcheck=1
-          enabled=1
-          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
-
-          [extras]
-          name=CentOS-7.9.2009 - Extras
-          baseurl=http://vault.centos.org/7.9.2009/extras/$basearch/
-          gpgcheck=1
-          enabled=1
-          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
-
-          [centosplus]
-          name=CentOS-7.9.2009 - Plus
-          baseurl=http://vault.centos.org/7.9.2009/centosplus/$basearch/
-          gpgcheck=1
-          enabled=0
-          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
-
-    - name: Clean yum metadata
-      command: yum clean all
-
-    - name: Rebuild yum cache
-      command: yum makecache
-
-    - name: Install essential tools
+    - name: Install dependencies
       yum:
         name:
-          - curl
+          - epel-release
           - wget
+          - unzip
+          - curl
           - git
         state: present
 
+    - name: Enable Remi repo for PHP 7.1
+      yum:
+        name: https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+        state: present
 
+    - name: Enable PHP 7.1
+      command: yum-config-manager --enable remi-php71
+
+    - name: Install PHP 7.1 and common extensions
+      yum:
+        name:
+          - php
+          - php-cli
+          - php-pdo
+          - php-mysql
+          - php-mbstring
+          - php-xml
+          - php-gd
+        state: present
+
+    - name: Install MySQL 5.6 (Oracle official repo)
+      get_url:
+        url: https://dev.mysql.com/get/mysql56-community-release-el7-11.noarch.rpm
+        dest: /tmp/mysql56.rpm
+
+    - name: Install MySQL repo
+      yum:
+        name: /tmp/mysql56.rpm
+        state: present
+
+    - name: Install MySQL server
+      yum:
+        name: mysql-community-server
+        state: present
+
+    - name: Enable and start MySQL
+      systemd:
+        name: mysqld
+        enabled: yes
+        state: started
+
+    - name: Install CakePHP dependencies (Composer)
+      get_url:
+        url: https://getcomposer.org/installer
+        dest: /tmp/composer-setup.php
+
+    - name: Install Composer globally
+      shell: php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
+      args:
+        creates: /usr/local/bin/composer
+
+    - name: Create CakePHP project (placeholder path)
+      shell: |
+        mkdir -p /var/www/html/cakephp
+        cd /var/www/html/cakephp
+        composer create-project --prefer-dist cakephp/app
+      args:
+        creates: /var/www/html/cakephp
+
+    - name: Set permissions
+      file:
+        path: /var/www/html/cakephp
+        recurse: yes
+        owner: apache
+        group: apache
