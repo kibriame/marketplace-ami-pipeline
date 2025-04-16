@@ -1,42 +1,49 @@
 ---
-- name: Harden and prepare CentOS 7.9 AMI
+- name: Basic CentOS 7.9 provisioning with hardening
   hosts: all
-  become: true
+  become: yes
 
   tasks:
-    - name: Update all packages
+
+    - name: Install EPEL repository
       yum:
-        name: '*'
-        state: latest
+        name: epel-release
+        state: present
 
     - name: Install basic packages
       yum:
         name:
-          - vim
+          - git
           - curl
           - wget
-          - net-tools
+          - unzip
+          - vim
         state: present
 
-    - name: Create app user
-      user:
-        name: ec2app
-        groups: wheel
-        shell: /bin/bash
+    - name: Set timezone to Asia/Dhaka (or change to yours)
+      timezone:
+        name: Asia/Dhaka
 
-    - name: Disable root SSH login
+    - name: Ensure password authentication is disabled for SSH
       lineinfile:
         path: /etc/ssh/sshd_config
-        regexp: '^PermitRootLogin'
-        line: 'PermitRootLogin no'
-
-    - name: Disable password authentication
-      lineinfile:
-        path: /etc/ssh/sshd_config
-        regexp: '^PasswordAuthentication'
+        regexp: '^#?PasswordAuthentication'
         line: 'PasswordAuthentication no'
+      notify: Restart SSH
 
-    - name: Restart SSHD
+    - name: Ensure root login is disabled
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PermitRootLogin'
+        line: 'PermitRootLogin no'
+      notify: Restart SSH
+
+    - name: Set a custom hostname
+      hostname:
+        name: centos7-secure-ami
+
+  handlers:
+    - name: Restart SSH
       service:
         name: sshd
         state: restarted
