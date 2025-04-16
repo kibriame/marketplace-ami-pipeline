@@ -1,0 +1,42 @@
+---
+- name: Harden and prepare CentOS 7.9 AMI
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Update all packages
+      yum:
+        name: '*'
+        state: latest
+
+    - name: Install basic packages
+      yum:
+        name:
+          - vim
+          - curl
+          - wget
+          - net-tools
+        state: present
+
+    - name: Create app user
+      user:
+        name: ec2app
+        groups: wheel
+        shell: /bin/bash
+
+    - name: Disable root SSH login
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^PermitRootLogin'
+        line: 'PermitRootLogin no'
+
+    - name: Disable password authentication
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^PasswordAuthentication'
+        line: 'PasswordAuthentication no'
+
+    - name: Restart SSHD
+      service:
+        name: sshd
+        state: restarted
