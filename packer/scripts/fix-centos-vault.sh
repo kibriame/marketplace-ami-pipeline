@@ -2,10 +2,11 @@
 set -eux
 
 # Backup original repo
-cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak
+sudo cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak
 
 # Replace with vault repo
-cat > /etc/yum.repos.d/CentOS-Base.repo <<EOF
+#cat > /etc/yum.repos.d/CentOS-Base.repo <<EOF
+sudo bash -c 'cat > /etc/yum.repos.d/CentOS-Base.repo <<EOF
 [base]
 name=CentOS-7.9.2009 - Base
 baseurl=http://vault.centos.org/7.9.2009/os/\$basearch/
@@ -26,8 +27,8 @@ baseurl=http://vault.centos.org/7.9.2009/extras/\$basearch/
 gpgcheck=1
 enabled=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
-EOF
+EOF'
 
 # Clean and rebuild yum cache
-yum clean all
-yum makecache
+sudo yum clean all
+sudo yum makecache
