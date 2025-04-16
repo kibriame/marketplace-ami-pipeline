@@ -37,10 +37,14 @@ build {
 
   provisioner "shell" {
     inline = [
-      "sudo yum install -y epel-release",
-      "sudo yum install -y python3",
-      "sudo ln -s /usr/bin/python3 /usr/bin/python || true"
-    ]
+        "sudo yum install -y yum-plugin-fastestmirror || true",  # Speed up yum, prevent timeout
+        "sudo yum clean all || true",                            # Clean cache
+        "sudo yum install -y epel-release || true",              # EPEL repo (extra packages)
+        "sudo yum update -y || true",                            # Update system
+        "sudo yum install -y python3",                           # Install Python 3
+        "sudo ln -s /usr/bin/python3 /usr/bin/python || true"    # Symlink for Python
+      ]
+
   }
 
   provisioner "ansible" {
