@@ -32,6 +32,7 @@ build {
 
   provisioner "shell" {
     script = "scripts/fix-centos-vault.sh"
+    execute_command = "sudo -S bash '{{ .Path }}'"
   }
 #provisioner "shell" {
  #   inline = [
