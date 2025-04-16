@@ -29,4 +29,4 @@ jobs:
           cd packer
           packer init centos7-ami.pkr.hcl
           packer validate centos7-ami.pkr.hcl
-          packer build centos7-ami.pkr.hcl
+          # packer build centos7-ami.pkr.hcl
