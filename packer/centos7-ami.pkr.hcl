@@ -52,6 +52,15 @@ build {
     ]
   }
 
+
+provisioner "shell" {
+  inline = [
+    "echo 'Installing required Perl dependencies...'",
+    "sudo yum install -y perl perl-Error perl-Data-Dumper perl-Encode perl-Exporter perl-File-Path perl-Git",
+    "echo '✅ Perl dependencies installed.'"
+  ]
+}
+
   provisioner "shell" {
     inline = [
       "echo '⚙️ Fixing SFTP server configuration...'",
