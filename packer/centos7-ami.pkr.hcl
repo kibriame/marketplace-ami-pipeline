@@ -39,32 +39,24 @@ build {
     execute_command  = "sudo -S bash '{{ .Path }}'"
   }
 
-  # 🐍 Install Python 3.8.18
-  provisioner "shell" {
-    inline = [
-      "echo '🐍 Installing Python 3.8.18 from source...'",
-      "sudo yum groupinstall -y 'Development Tools'",
-      "sudo yum install -y gcc openssl-devel bzip2-devel libffi-devel wget make",
-      "cd /usr/src && sudo wget https://www.python.org/ftp/python/3.8.18/Python-3.8.18.tgz",
-      "sudo tar xzf Python-3.8.18.tgz",
-      "cd Python-3.8.18 && sudo ./configure --enable-optimizations && sudo make altinstall || { echo 'Python build failed'; exit 1; }",
-      "sudo ln -sf /usr/local/bin/python3.8 /usr/bin/python3",
-      "sudo ln -sf /usr/local/bin/python3.8 /usr/bin/python",
-      "sudo rm -rf /usr/src/Python-3.8.18 /usr/src/Python-3.8.18.tgz",
-      "echo '✅ Python 3.8 ready for Ansible'"
-    ]
-  }
-
-  # ➕ Install EPEL & Perl dependencies
-  provisioner "shell" {
-    inline = [
-      "echo '➡️ Adding EPEL repository for extended packages...'",
-      "sudo yum install -y epel-release",
-      "echo 'Installing required Perl dependencies...'",
-      "sudo yum install -y perl perl-Error perl-Data-Dumper perl-Encode perl-Exporter perl-File-Path perl-Git",
-      "echo '✅ Perl dependencies installed.'"
-    ]
-  }
+  
+# Install Python and Perl Dependencies
+provisioner "shell" {
+  inline = [
+    "echo '➡️ Adding EPEL repository for extended packages...'",
+    "sudo yum install -y epel-release || { echo 'Failed to install EPEL'; exit 1; }",
+    "echo '🐍 Installing Python 3.8.18 from source...'",
+    "sudo yum groupinstall -y 'Development Tools'",
+    "sudo yum install -y gcc openssl-devel bzip2-devel libffi-devel wget make perl perl-core perl-Error perl-Data-Dumper perl-Encode perl-Exporter perl-File-Path perl-Git || { echo 'Failed to install dependencies'; exit 1; }",
+    "cd /usr/src && sudo wget https://www.python.org/ftp/python/3.8.18/Python-3.8.18.tgz",
+    "sudo tar xzf Python-3.8.18.tgz",
+    "cd Python-3.8.18 && sudo ./configure --enable-optimizations && sudo make altinstall || { echo 'Python build failed'; exit 1; }",
+    "sudo ln -sf /usr/local/bin/python3.8 /usr/bin/python3",
+    "sudo ln -sf /usr/local/bin/python3.8 /usr/bin/python",
+    "sudo rm -rf /usr/src/Python-3.8.18 /usr/src/Python-3.8.18.tgz",
+    "echo '✅ Python 3.8 and Perl dependencies are ready.'"
+  ]
+}
 
   # ✅ Check critical dependencies
   provisioner "shell" {
