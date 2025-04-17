@@ -48,22 +48,19 @@ build {
     ]
   }
 
+  # Optional debug info
   provisioner "shell" {
     inline = [
-      "echo '🔍 Running sanity check before Ansible...'",
+      "echo '🧪 Debugging before Ansible...'",
       "whoami",
-      "ls -lah",
-      "echo '➡️ Starting Ansible provisioning...'"
+      "ls -lah /home/centos",
+      "cat /etc/redhat-release"
     ]
   }
 
+  # ✅ Ansible provisioner - no env here!
   provisioner "ansible" {
-    playbook_file = "playbook.yml"
-    extra_arguments = ["-vvv"]
-    env = {
-      ANSIBLE_DEBUG = "1"
-      ANSIBLE_FORCE_COLOR = "true"
-      ANSIBLE_HOST_KEY_CHECKING = "False"
-    }
+    playbook_file    = "playbook.yml"
+    extra_arguments  = ["-vvv"]  # Enable verbose output
   }
 }
