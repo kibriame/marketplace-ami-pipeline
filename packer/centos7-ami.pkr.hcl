@@ -37,18 +37,33 @@ build {
 
   provisioner "shell" {
     inline = [
-        "sudo yum install -y yum-plugin-fastestmirror || true",  # Speed up yum, prevent timeout
-        "sudo yum clean all || true",                            # Clean cache
-        "sudo yum install -y epel-release || true",              # EPEL repo (extra packages)
-        "sudo yum update -y || true",                            # Update system
-        "sudo yum install -y python3",                           # Install Python 3
-        "sudo [ ! -f /usr/bin/python ] && sudo ln -s /usr/bin/python3 /usr/bin/python || true"
-        # "sudo ln -s /usr/bin/python3 /usr/bin/python || true"    # Symlink for Python
-      ]
+      "echo '✅ Preparing system...'",
+      "sudo yum install -y yum-plugin-fastestmirror || true",
+      "sudo yum clean all || true",
+      "sudo yum install -y epel-release || true",
+      "sudo yum update -y || true",
+      "sudo yum install -y python3",
+      "sudo [ ! -f /usr/bin/python ] && sudo ln -s /usr/bin/python3 /usr/bin/python || true",
+      "echo '✅ Python installed, ready for Ansible'"
+    ]
+  }
 
+  provisioner "shell" {
+    inline = [
+      "echo '🔍 Running sanity check before Ansible...'",
+      "whoami",
+      "ls -lah",
+      "echo '➡️ Starting Ansible provisioning...'"
+    ]
   }
 
   provisioner "ansible" {
     playbook_file = "playbook.yml"
+    extra_arguments = ["-vvv"]
+    env = {
+      ANSIBLE_DEBUG = "1"
+      ANSIBLE_FORCE_COLOR = "true"
+      ANSIBLE_HOST_KEY_CHECKING = "False"
+    }
   }
 }
