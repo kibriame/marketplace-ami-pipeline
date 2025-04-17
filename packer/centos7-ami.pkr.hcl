@@ -52,6 +52,18 @@ build {
     ]
   }
 
+  provisioner "shell" {
+    inline = [
+      "echo '⚙️ Fixing SFTP server configuration...'",
+      "sudo yum install -y openssh openssh-server openssh-clients",
+      "sudo mkdir -p /var/run/sshd",
+      "sudo sed -i '/^Subsystem sftp/d' /etc/ssh/sshd_config",
+      "echo 'Subsystem sftp /usr/libexec/openssh/sftp-server' | sudo tee -a /etc/ssh/sshd_config",
+      "sudo systemctl restart sshd || sudo service sshd restart"
+    ]
+  }
+
+
   # Install and configure openssh-sftp-server
   provisioner "shell" {
     inline = [
