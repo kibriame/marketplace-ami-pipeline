@@ -42,7 +42,8 @@ build {
         "sudo yum install -y epel-release || true",              # EPEL repo (extra packages)
         "sudo yum update -y || true",                            # Update system
         "sudo yum install -y python3",                           # Install Python 3
-        "sudo ln -s /usr/bin/python3 /usr/bin/python || true"    # Symlink for Python
+        "sudo [ ! -f /usr/bin/python ] && sudo ln -s /usr/bin/python3 /usr/bin/python || true"
+        # "sudo ln -s /usr/bin/python3 /usr/bin/python || true"    # Symlink for Python
       ]
 
   }
