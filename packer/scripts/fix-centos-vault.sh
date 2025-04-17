@@ -1,12 +1,15 @@
 #!/bin/bash
-set -eux
+set -euxo pipefail
 
-# Backup original repo
-sudo cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak
+echo "🔧 Fixing CentOS 7 repository with vault.centos.org..."
 
-# Replace with vault repo
-#cat > /etc/yum.repos.d/CentOS-Base.repo <<EOF
-sudo bash -c 'cat > /etc/yum.repos.d/CentOS-Base.repo <<EOF
+# Backup original repo if it exists
+if [ -f /etc/yum.repos.d/CentOS-Base.repo ]; then
+  sudo cp -v /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak
+fi
+
+# Replace the base repo with CentOS 7.9 vault
+sudo tee /etc/yum.repos.d/CentOS-Base.repo > /dev/null <<EOF
 [base]
 name=CentOS-7.9.2009 - Base
 baseurl=http://vault.centos.org/7.9.2009/os/\$basearch/
@@ -27,8 +30,10 @@ baseurl=http://vault.centos.org/7.9.2009/extras/\$basearch/
 gpgcheck=1
 enabled=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
-EOF'
+EOF
 
-# Clean and rebuild yum cache
+# Clean and regenerate YUM cache
 sudo yum clean all
-sudo yum makecache
+sudo yum makecache fast
+
+echo "✅ Vault repo fix applied successfully!"
